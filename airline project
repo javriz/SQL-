@@ -1,0 +1,49 @@
+
+create database airline;
+
+use airline;
+
+##1--- Write a query to create route_details table using suitable data types for the fields, 
+such as route_id, flight_num, origin_airport, destination_airport, aircraft_id, and distance_miles. Implement the check constraint for the flight number and unique constraint for the route_id fields. 
+Also, make sure that the distance miles field is greater than 0.
+
+select * from airline.routes
+where distance_miles >0;
+
+#2---Write a query to display all the passengers (customers) who have travelled in routes 01 to 25. Take data  from the passengers_on_flights 
+
+select * from airline.passengers_on_flights
+where route_id between '1' and '25';
+
+##3---Write a query to identify the number of passengers and total revenue in business class from the ticket_details table.
+
+select count(customer_id),sum(Price_per_ticket) from airline.ticket_details
+where class_id='Bussiness';
+
+##4---Write a query to display the full name of the customer by extracting the first name and last name from the customer table.
+select first_name,last_name,concat(first_name,' ',last_name) as name from airline.customer;
+##5---Write a query to extract the customers who have registered and booked a ticket. Use data from the customer and ticket_details tables.
+
+select c.customer_id,c.first_name,t.p_date from airline.customer c
+left join airline.ticket_details t
+on c.customer_id=t.customer_id
+where p_date is not null;
+
+##6---Write a query to identify the customer’s first name and last name based on their customer ID and brand (Emirates) from the ticket_details table.
+select c.customer_id,c.first_name,t.brand from airline.customer c
+left join airline.ticket_details t
+on c.customer_id=t.customer_id
+where brand='Emirates';
+
+##7---Write a query to identify the customers who have travelled by Economy Plus class using Group By and Having clause on the passengers_on_flights table.
+
+select count( c.customer_id),t.class_id from airline.customer c
+left join airline.passengers_on_flights t
+on c.customer_id=t.customer_id
+group by class_id
+having class_id='Economy Plus';
+
+left join airline.passengers_on_flights t
+on c.customer_id=t.customer_id
+group by class_id
+having class_id='Economy Plus';
