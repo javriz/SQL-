@@ -42,8 +42,146 @@ left join airline.passengers_on_flights t
 on c.customer_id=t.customer_id
 group by class_id
 having class_id='Economy Plus';
-
 left join airline.passengers_on_flights t
 on c.customer_id=t.customer_id
 group by class_id
 having class_id='Economy Plus';
+
+##8--Write a query to identify whether the revenue has crossed 10000 using the IF clause on the ticket_details table.
+
+select case when sum(Price_per_ticket)>10000 then 'met_target'else 'not_met_target' end as revenue from airline.ticket_details;
+
+##9-- Write a query to find the maximum ticket price for each class using window functions on the ticket_details table.
+
+select *,max(price_per_ticket) over(partition by class_id) as max_price
+from airline.ticket_details;
+
+##10--Write a query to extract the passengers whose route ID is 4 by improving the speed and performance of the passengers_on_flights table.
+
+select * from airline.passengers_on_flights
+where route_id=4;
+select * from airline.passengers_on_flights;
+
+##11--Write a query to create a stored procedure to get the details of all passengers flying between a range of routes defined in run time.
+ Also, return an error message if the table doesn't exist.
+
+delimiter 
+create procedure range_route()
+begin
+	SELECT c.customer_id,
+            c.first_name,
+            c.last_name,
+            c.date_of_birth,
+            c.gender,
+            pof.flight_num,
+            pof.depart AS departure_airport,
+            pof.arrival AS arrival_airport,
+            pof.travel_date,
+            pof.seat_num,
+            pof.class_id,
+            r.distance_miles
+        FROM 
+            airline.customer c
+        JOIN 
+            airline.passengers_on_flights pof ON c.customer_id = pof.customer_id
+        JOIN 
+            routes r ON pof.route_id = r.route_id AND pof.flight_num = r.flight_num
+        WHERE 
+            r.route_id BETWEEN start_route_id AND end_route_id
+        ORDER BY 
+            r.route_id, pof.flight_num, ;
+    
+END
+
+DELIMITER ;
+
+ call range_route();
+
+
+##000
+DELIMITER //
+
+CREATE PROCEDURE range_route(
+    IN start_route_id INT,
+    IN end_route_id INT
+)
+BEGIN
+    SELECT 
+        start_route_id AS range_start,  -- Add start parameter to output
+        end_route_id AS range_end,      -- Add end parameter to output
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.date_of_birth,
+        c.gender,
+        pof.flight_num,
+        pof.depart AS departure_airport,
+        pof.arrival AS arrival_airport,
+        pof.travel_date,
+        pof.seat_num,
+        pof.class_id,
+        r.distance_miles
+    FROM 
+        customer c
+    JOIN 
+        passengers_on_flights pof ON c.customer_id = pof.customer_id
+    JOIN 
+        routes r ON pof.route_id = r.route_id AND pof.flight_num = r.flight_num
+    WHERE 
+        r.route_id BETWEEN start_route_id AND end_route_id
+    ORDER BY 
+        r.route_id, pof.flight_num;
+END //
+
+DELIMITER ;
+
+
+##12--Write a query to create a stored procedure that extracts all the details from the routes table 
+ where the travelled distance is more than 2000 miles.
+
+
+delimiter //
+create procedure travel_dis2000()
+begin
+      select * from routes
+      where distance_miles > '2000' ;
+end //
+delimiter ;
+call travel_dis2000();
+
+##13--Write a query to create a stored procedure that groups the distance travelled by each flight into three categories.
+ he categories are, short distance travel (SDT) for >=0 AND <= 2000 miles, intermediate distance travel (IDT) for >2000 AND <=6500,
+ and long-distance travel (LDT) for >6500.
+
+
+select *, case when  distance_miles >='0' AND distance_miles <= '2000' then 'STD'
+when distance_miles >'2000' AND distance_miles <= '6500' then  'IDT'
+when distance_miles >='6500'  then 'LDT' end as distance from routes;
+
+##14--Write a query to extract ticket purchase date, customer ID, class ID and specify if the 
+complimentary services are provided for the specific class using a stored function in stored procedure on the ticket_details table.
+If the class is Business and Economy Plus, then complimentary services are given as Yes, else it is No
+
+
+delimiter //
+create procedure complimentary()
+begin
+    select p_date,
+    customer_id,
+    class_id,
+    case when class_id='Business' then 'comp_ser'
+    when class_id = 'Economy Plus' then 'comp_ser'
+    else 'none' end
+    from ticket_details;
+ end//
+ delimiter ;
+ call complimentary();
+ 
+##15--Write a query to extract the first record of the customer whose last name ends with Scott using a cursor from the customer table.
+ 
+SELECT *
+FROM customer
+WHERE last_name LIKE '%Scott'
+ORDER BY customer_id
+LIMIT 1;
+
